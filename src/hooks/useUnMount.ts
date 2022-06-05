@@ -1,6 +1,6 @@
 import { useEffect, EffectCallback, useRef } from 'react';
 
-export function useUnMount(effect: EffectCallback) {
+export function useUnmount(effect: EffectCallback) {
   const fnRef = useRef(effect);
 
   fnRef.current = effect;

@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import { useUnMount } from '../hooks/useUnMount';
+import { useUnmount } from '../hooks/useUnmount';
 import styles from './index.less';
 
 const MyComponent = () => {
   const [count, setCount] = useState(0);
-  useUnMount(() => {
+  useUnmount(() => {
     console.log(count);
   });
   return (

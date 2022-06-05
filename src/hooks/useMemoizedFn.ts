@@ -1,13 +1,33 @@
-import { EffectCallback, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 
-export function useMemoizedFn(effect: EffectCallback) {
-  const fnRef = useRef(effect);
+type noop = (this: any, ...args: any[]) => any;
 
-  fnRef.current = effect;
+type PickFunction<T extends noop> = (
+  this: ThisParameterType<T>,
+  ...args: Parameters<T>
+) => ReturnType<T>;
 
-  const memoizedFn = useRef(() => {
-    fnRef.current();
-  });
+export function useMemoizedFn<T extends noop>(fn: T) {
+  if (process.env.NODE_ENV === 'development') {
+    if (typeof fn !== 'function') {
+      console.error(
+        `useMemoizedFn expected parameter is a function, got ${typeof fn}`,
+      );
+    }
+  }
 
-  return memoizedFn;
+  const fnRef = useRef<T>(fn);
+
+  // why not write `fnRef.current = fn`?
+  // https://github.com/alibaba/hooks/issues/728
+  fnRef.current = useMemo(() => fn, [fn]);
+
+  const memoizedFn = useRef<PickFunction<T>>();
+  if (!memoizedFn.current) {
+    memoizedFn.current = function (this, ...args) {
+      return fnRef.current.apply(this, args);
+    };
+  }
+
+  return memoizedFn.current as T;
 }
